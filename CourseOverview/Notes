@@ -1,0 +1,11 @@
+TODOS:
+
+- Implement react-bootstrap components (PRIORITY)
+- Check that the cache is updated when the mutation is made.
+- Change react-icons to Font Awesome.
+- Fix the modal hierarchy, so that the modal can be hidden, when the form is submitted.
+- Create a modal for the exams.
+
+IDEAS:
+
+- Create course cards, that will be listed beneath exams. (Use React Router)
