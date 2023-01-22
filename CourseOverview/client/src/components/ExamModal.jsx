@@ -1,50 +1,39 @@
-import { Button, Modal, Form, Dropdown } from "react-bootstrap";
+import { Button, Modal, Form, Alert } from "react-bootstrap";
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_COURSES, GET_EXAMS } from "../graphql/queries";
 import { ADD_EXAM } from "../graphql/mutations";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCircleCheck,
+  faExclamationTriangle,
+} from "@fortawesome/free-solid-svg-icons";
 
 const ExamModal = () => {
   const { loading, error, data } = useQuery(GET_COURSES);
 
   const [show, setShow] = useState(false);
 
-  const handleClose = () => {
-    setShow(false);
-    setExamName("");
-    setDate("");
-
-    setValidExamName(true);
-    setErrorExamNameMessage("");
-    setValidDate(true);
-    setErrorDateMessage("");
-    setSuccess(false);
-  };
-
   const [examName, setExamName] = useState("");
   const [courseName, setCourseName] = useState("");
   const [courseId, setCourseId] = useState("");
   const [date, setDate] = useState("");
 
+  //! Validation states
   const [validExamName, setValidExamName] = useState(true);
   const [errorExamNameMessage, setErrorExamNameMessage] = useState("");
 
   const [validDate, setValidDate] = useState(true);
   const [errorDateMessage, setErrorDateMessage] = useState("");
 
-  const [validCourseName, setValidCourseName] = useState(true);
-  const [errorCourseNameMessage, setErrorCourseNameMessage] = useState("");
+  // const [validCourseName, setValidCourseName] = useState(true);
+  // const [errorCourseNameMessage, setErrorCourseNameMessage] = useState("");
 
   const [success, setSuccess] = useState(false);
 
   //! Issue here with courseId
   const [addExam] = useMutation(ADD_EXAM, {
-    variables: {
-      name: examName,
-      date: date,
-      grade: 0,
-      course_id: courseId,
-    },
     //! Might need to refetch GET_COURSES
     refetchQueries: [{ query: GET_EXAMS }],
     update(cache, { data: { addExam } }) {
@@ -60,17 +49,31 @@ const ExamModal = () => {
     setShow(true);
     setCourseName(data.courses[0].name);
     setCourseId(data.courses[0].id);
-    console.log(data.courses);
   };
+
+  const handleClose = () => {
+    setShow(false);
+    setExamName("");
+    setDate("");
+
+    setValidExamName(true);
+    setErrorExamNameMessage("");
+    setValidDate(true);
+    setErrorDateMessage("");
+    setSuccess(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(examName, courseName, date);
     console.log(courseId);
     const { courses } = data;
 
+    setCourseId(courses.find((course) => course.name === courseName).id);
+
     setValidExamName(true);
     setValidDate(true);
-    setValidCourseName(true);
+    // setValidCourseName(true);
     let error = false;
 
     // Error handling
@@ -78,16 +81,16 @@ const ExamModal = () => {
     // Exam name
     if (examName === "") {
       setValidExamName(false);
-      setErrorExamNameMessage("Kurssin nimi ei voi olla tyhjä");
+      setErrorExamNameMessage("Kokeen nimi ei voi olla tyhjä");
       error = true;
     }
 
-    //! Might need to change this (i.e. if I want to use convention of "Exam 1" etc.)")
-    if (!examName.split("").every((char) => char.match(/^[a-zA-Z\s]*$/))) {
-      setValidExamName(false);
-      setErrorExamNameMessage("Kurssin nimi voi sisältää vain kirjaimia");
-      error = true;
-    }
+    //! Might need to change this (i.e. if I want to use "Exam 1" etc.)")
+    // if (!examName.split("").every((char) => char.match(/^[a-zA-Z\s]*$/))) {
+    //   setValidExamName(false);
+    //   setErrorExamNameMessage("Kurssin nimi voi sisältää vain kirjaimia");
+    //   error = true;
+    // }
 
     if (examName.length > 20) {
       setValidExamName(false);
@@ -100,7 +103,7 @@ const ExamModal = () => {
       course.exams.forEach((exam) => {
         if (exam.name.toLowerCase() === examName.toLowerCase()) {
           setValidExamName(false);
-          setErrorExamNameMessage("Kurssilla on jo samanniminen tentti");
+          setErrorExamNameMessage("Kokeen nimi on jo olemassa");
           error = true;
         }
       });
@@ -130,11 +133,11 @@ const ExamModal = () => {
     // END Date
 
     // Course name
-    if (courseName === "") {
-      setValidCourseName(false);
-      setErrorCourseNameMessage("Kurssin nimi ei voi olla tyhjä");
-      error = true;
-    }
+    // if (courseName === "") {
+    //   setValidCourseName(false);
+    //   setErrorCourseNameMessage("Kurssin nimi ei voi olla tyhjä");
+    //   error = true;
+    // }
 
     // END Course name
 
@@ -142,8 +145,16 @@ const ExamModal = () => {
 
     if (!error) {
       //! This is empty?
-      console.log(courseId);
-      addExam();
+      //! Now its not?
+      // console.log(courseId);
+      addExam({
+        variables: {
+          name: examName,
+          date: date,
+          grade: 0,
+          course_id: courseId,
+        },
+      });
       setSuccess(true);
       console.log("Success!");
     }
@@ -170,6 +181,33 @@ const ExamModal = () => {
             <Modal.Title>Lisää koe</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            {/*Alerts*/}
+
+            <Alert variant="success" show={success}>
+              <div className="m-2 d-inline">
+                <FontAwesomeIcon icon={faCircleCheck} />
+              </div>
+              Kurssi lisätty onnistuneesti!
+            </Alert>
+            <Alert
+              variant="danger"
+              show={!validExamName}
+              className="alert-danger"
+            >
+              <div className="m-2 d-inline">
+                <FontAwesomeIcon icon={faExclamationTriangle} />
+              </div>
+              {errorExamNameMessage}
+            </Alert>
+            <Alert variant="danger" show={!validDate} className="alert-danger">
+              <div className="m-2 d-inline">
+                <FontAwesomeIcon icon={faExclamationTriangle} />
+              </div>
+              {errorDateMessage}
+            </Alert>
+
+            {/*END Alerts*/}
+
             <Form onSubmit={handleSubmit}>
               <Form.Group controlId="formBasicName" className="mb-3">
                 <Form.Label>Kokeen nimi</Form.Label>
@@ -194,12 +232,16 @@ const ExamModal = () => {
                 <Form.Select
                   placeholder="Kurssin nimi"
                   value={courseName}
+                  //! Issue here
                   onChange={(e) => {
-                    handleChange(setCourseName, e);
-                    setCourseId(
-                      data.courses.find((course) => course.name === courseName)
-                        .id
-                    );
+                    setCourseName(e.target.value);
+                    // handleChange(setCourseName, e);
+                    // console.log("Name: " + courseName);
+                    // setCourseId(
+                    //   data.courses.find((course) => course.name === courseName)
+                    //     .id
+                    // );
+                    // console.log("ID: " + courseId);
                   }}
                 >
                   {loading ? (

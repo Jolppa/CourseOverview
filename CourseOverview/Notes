@@ -1,11 +1,29 @@
 TODOS:
 
-- Implement react-bootstrap components (PRIORITY)
-- Check that the cache is updated when the mutation is made.
-- Change react-icons to Font Awesome.
-- Fix the modal hierarchy, so that the modal can be hidden, when the form is submitted.
-- Create a modal for the exams.
+- Error handling in exam modal (Show errors and such)
+- Clean code
+- Create a way to change course and exam information on the front-end (React Router?)
 
 IDEAS:
 
-- Create course cards, that will be listed beneath exams. (Use React Router)
+- Create course cards that will be listed beneath exams
+
+INSTALLATION:
+
+- Create secret.env file in the ./server/util/
+  - Create MONGO_URI variable ("mongodb+srv://USERNAME:PASSWORD@cluster0.x6hishj.mongodb.net/CO?retryWrites=true&w=majority")
+    - If you want to use mock data, you don't need to set this
+  - Create PORT variable
+    - If not set, will default to 5000
+  - Create NODE_ENV ("dev" || "prod")
+    - NODE_ENV = "prod" doesn't do anything as of now
+    - Do not create NODE_ENV variable, if you want to use mock data (list of plain Javascript objects; no MongoDB)
+
+ISSUES:
+
+- CourseModal won't let the mutation happen on the first click, but the second will go through?
+  - It's inconsistent, when it goes through
+  - Has something to do with the course_credit
+    - FIXED!
+- ExamModal doesn't change the courseId (It's always the first in the list)
+  - Need to fix how it sets the courseId state

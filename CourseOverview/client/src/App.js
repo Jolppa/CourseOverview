@@ -1,4 +1,3 @@
-// import './App.css';
 import { Container } from "react-bootstrap";
 import Header from "./components/Header";
 import InfoPanel from "./components/InfoPanel";
@@ -7,8 +6,10 @@ import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 import CourseModal from "./components/CourseModal";
 import ExamModal from "./components/ExamModal";
 
+const port = 5000;
+
 const client = new ApolloClient({
-  uri: "http://localhost:5000/graphql",
+  uri: `http://localhost:${port}/graphql`,
   cache: new InMemoryCache(),
 });
 

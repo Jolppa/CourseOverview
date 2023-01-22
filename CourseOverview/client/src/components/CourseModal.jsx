@@ -16,29 +16,12 @@ const CourseModal = () => {
 
   const [show, setShow] = useState(false);
 
-  const handleClose = () => {
-    setShow(false);
-    setName("");
-    setStartDate("");
-    setEndDate("");
-    setCourseCredit("");
-    setValidName(true);
-    setErrorNameMessage("");
-    setValidStartDate(true);
-    setErrorStartDateMessage("");
-    setValidEndDate(true);
-    setErrorEndDateMessage("");
-    setValidCourseCredit(true);
-    setErrorCourseCreditMessage("");
-    setSuccess(false);
-  };
-  const handleShow = () => setShow(true);
-
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [courseCredit, setCourseCredit] = useState("");
 
+  //! Validation states
   const [validName, setValidName] = useState(true);
   const [errorNameMessage, setErrorNameMessage] = useState("");
 
@@ -54,13 +37,6 @@ const CourseModal = () => {
   const [success, setSuccess] = useState(false);
 
   const [addCourse] = useMutation(ADD_COURSE, {
-    variables: {
-      name: name,
-      start_date: startDate,
-      end_date: endDate,
-      grade: 0,
-      course_credit: courseCredit,
-    },
     refetchQueries: [{ query: GET_COURSES }],
     update(cache, { data: { addCourse } }) {
       const { courses } = cache.readQuery({ query: GET_COURSES });
@@ -77,6 +53,29 @@ const CourseModal = () => {
   const handleChange = (setFunc, e) => {
     setFunc(e.target.value);
   };
+
+  const handleClear = () => {
+    setName("");
+    setStartDate("");
+    setEndDate("");
+    setCourseCredit("");
+
+    setValidName(true);
+    setErrorNameMessage("");
+    setValidStartDate(true);
+    setErrorStartDateMessage("");
+    setValidEndDate(true);
+    setErrorEndDateMessage("");
+    setValidCourseCredit(true);
+    setErrorCourseCreditMessage("");
+  };
+
+  const handleClose = () => {
+    setShow(false);
+    handleClear();
+    setSuccess(false);
+  };
+  const handleShow = () => setShow(true);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -170,6 +169,7 @@ const CourseModal = () => {
 
     // Course credit
     if (courseCredit === "") {
+      //! Issue here maybe?
       setCourseCredit(5);
     } else if (courseCredit < 1 || courseCredit > 10) {
       setValidCourseCredit(false);
@@ -182,9 +182,19 @@ const CourseModal = () => {
 
     // END Error handling
 
+    //! Will not add course on the first try, but will on the second try?
     if (!error) {
+      addCourse({
+        variables: {
+          name: name,
+          start_date: startDate,
+          end_date: endDate,
+          grade: 0,
+          //! Needed to parse int here, otherwise it would try to add a string to the database
+          course_credit: parseInt(courseCredit),
+        },
+      });
       setSuccess(true);
-      addCourse();
     }
     error = false;
   };

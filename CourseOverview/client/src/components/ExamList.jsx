@@ -6,7 +6,7 @@ const ExamList = () => {
 
   return (
     <div className="col-8">
-      <h2>Exams</h2>
+      <h2>Kokeet</h2>
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
@@ -15,10 +15,10 @@ const ExamList = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Date</th>
-              <th>Grade</th>
-              <th>Course</th>
+              <th>Nimi</th>
+              <th>Päivämäärä</th>
+              <th>Arvosana</th>
+              <th>Kurssi</th>
             </tr>
           </thead>
           <tbody>
